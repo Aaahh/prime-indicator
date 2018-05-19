@@ -239,37 +239,9 @@ class Indicator:
     def execute(self):
         Gtk.main()
 
-    def logout(self):
-        env = os.environ.get("XDG_CURRENT_DESKTOP", "UNSUPPORTED")
-        if env:
-            env = env.lower()
-
-        if env.startswith("xfce"):
-            os.system("xfce4-session-logout --logout")
-            restart()
-        elif env.startswith("kde"):
-            os.system("qdbus org.kde.ksmserver /KSMServer logout 0 0 0")
-        elif env.startswith("lxde"):
-            os.system("lxsession-logout --prompt 'Please click the Log Out button to continue'")
-        elif env.startswith("x-cinnamon"):
-            os.system("cinnamon-session-quit --logout --no-prompt")
-        elif env.startswith("mate"):
-            os.system("mate-session-save --logout")
-        elif env.startswith("budgie"):
-            os.system("budgie-session --logout")
-        elif env.startswith("lxqt"):
-            os.system("lxqt-leave --logout ")
-        elif env.startswith("gnome") or env.startswith("pantheon") or env.startswith("unity"):
-            os.system("gnome-session-quit --logout --no-prompt")
-        elif env.startswith("i3"):
-            os.system("i3-msg exit")
-        else:
-            message = "It seems you're running an unsupported Desktop Environment. " + \
-                      "Please manually log out and then log in again to complete the switch."
-            dialog = Gtk.MessageDialog(None, Gtk.DIALOG_MODAL, Gtk.MESSAGE_ERROR, Gtk.BUTTONS_OK, message)
-            dialog.set_deletable(False)
-            dialog.run()
-            restart()
+    def reboot(self):
+        os.system("reboot")
+        restart()
 
     def renderer_string(self) -> str:
         out = subprocess.getoutput("glxinfo | grep 'OpenGL renderer string'")  # type:str
@@ -314,15 +286,15 @@ class Indicator:
     def show_reboot_dialog(self):
         msg_nvidia = "dedicated NVIDIA GPU"
         msg_intel = "integrated Intel GPU"
-        message = "You need to log out to switch from the " + \
+        message = "You need to reboot to switch from the " + \
                   (msg_intel if (self.active_gpu == INTEL) else msg_nvidia) + \
                   " to the " + (msg_nvidia if (self.active_gpu == INTEL) else msg_intel) + \
-                  ". Save your work before clicking the Log Out button below."
+                  ". Save your work before clicking the reboot button below."
         dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.INFO,
                                    Gtk.ButtonsType.NONE, message)
         dialog.set_deletable(False)
         dialog.connect("delete_event", self.ignore)
-        dialog.add_button("Log Out", Gtk.ResponseType.OK)
+        dialog.add_button("Reboot", Gtk.ResponseType.OK)
         dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
         response = dialog.run()
         dialog.destroy()
@@ -332,7 +304,7 @@ class Indicator:
         response = self.show_reboot_dialog()
         if response != Gtk.ResponseType.CANCEL:
             self.switch_gpu()
-            self.logout()
+            self.reboot()
 
 
 def kill_other_instances() -> None:
