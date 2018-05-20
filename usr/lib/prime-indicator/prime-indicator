@@ -255,8 +255,8 @@ class Indicator:
         return "Force NVIDIA GPU to " + ("power OFF" if self.is_nvidia_on() else "power ON")
 
     def is_nvidia_on(self) -> bool:
-        out = subprocess.getoutput("cat /proc/acpi/bbswitch")
-        return out.lower().endswith("on")
+        out = subprocess.getoutput("cat /sys/kernel/debug/vgaswitcheroo/switch")
+        return "DIS: :Off" in out
 
     def switch_gpu(self) -> None:
         if self.active_gpu in [INTEL, NVIDIA]:
